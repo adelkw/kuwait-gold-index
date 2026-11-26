@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
-URL = "https://new2.moci.gov.kw/ar/gold/"
+URL = "https://api.moci.gov.kw/ar/market-prices/gold/"
 OUT = "data/prices.json"
 TZ = ZoneInfo("Asia/Kuwait")
 
