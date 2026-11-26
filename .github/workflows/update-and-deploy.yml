@@ -23,7 +23,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: تثبيت المتطلبات
-        run: pip install requests beautifulsoup4
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
       - name: تسجيل السعر الرسمي
         run: python scripts/update_prices.py
       - name: حفظ السجل اليومي
