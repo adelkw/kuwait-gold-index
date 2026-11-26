@@ -40,8 +40,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: جلب المستودع
+      - name: جلب أحدث نسخة بعد تحديث الأسعار
         uses: actions/checkout@v4
+        with:
+          ref: main
       - name: إعداد صفحات GitHub
         uses: actions/configure-pages@v5
       - name: تجهيز ملفات الموقع
