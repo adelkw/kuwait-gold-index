@@ -1,64 +1,61 @@
-import json, re, os
+import json
+import os
+import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import requests
-from bs4 import BeautifulSoup
+
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 URL = "https://new2.moci.gov.kw/ar/gold/"
 OUT = "data/prices.json"
 TZ = ZoneInfo("Asia/Kuwait")
-
 DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩٫٬", "0123456789..")
 
-def norm(s):
-    return s.translate(DIGITS).replace(",", "").strip()
+def norm(value):
+    return value.translate(DIGITS).replace(",", "").replace("٬", "").strip()
 
-def first_number(value):
-    match = re.search(r"\d+(?:\.\d+)?", norm(value))
-    return float(match.group()) if match else None
+def extract_number(pattern, text):
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+    return float(match.group(1)) if match else None
 
 def main():
-    response = requests.get(URL, timeout=30, headers={"User-Agent":"Mozilla/5.0 KuwaitGoldIndex/1.0"})
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
-    text = norm(" ".join(soup.stripped_strings))
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+        page = browser.new_page(locale="ar-KW", timezone_id="Asia/Kuwait")
+        page.goto(URL, wait_until="domcontentloaded", timeout=60000)
+        try:
+            page.wait_for_function(
+                "() => document.body && /عيار\\s*24/.test(document.body.innerText) && /الأونصة|الاونصة/.test(document.body.innerText)",
+                timeout=45000
+            )
+        except PlaywrightTimeoutError:
+            pass
+        page.wait_for_timeout(2500)
+        body = page.locator("body").inner_text(timeout=15000)
+        browser.close()
 
-    # First try semantic table rows.
+    text = norm(" ".join(body.split()))
+    if "Javascript is required" in text or "You are being redirected" in text:
+        raise RuntimeError("وزارة التجارة أعادت صفحة تحقق آلي ولم تسمح للمتصفح الآلي بالوصول إلى الأسعار.")
+
     prices = {}
-    ounce = None
-    for tr in soup.find_all("tr"):
-        cells = [norm(c.get_text(" ", strip=True)) for c in tr.find_all(["td", "th"])]
-        if len(cells) < 2:
-            continue
-        label = cells[0]
-        match = re.search(r"(?:عيار\s*)?(24|22|21|18)", label)
-        if match and "عيار" in label:
-            value = first_number(" ".join(cells[1:]))
-            if value is not None:
-                prices[match.group(1)] = value
-        elif "الأونصة" in label or "الاونصة" in label:
-            ounce = first_number(" ".join(cells[1:]))
+    for karat in ("24", "22", "21", "18"):
+        value = extract_number(r"عيار\\s*" + karat + r"\\s*(?:د\\.?ك)?\\s*([0-9]+(?:\\.[0-9]+)?)", text)
+        if value is None:
+            value = extract_number(r"عيار\\s*" + karat + r".{0,80}?([0-9]+(?:\\.[0-9]+)?)", text)
+        if value is not None:
+            prices[karat] = value
 
-    # Fallback for the ministry page when its visible data is rendered in non-table elements.
-    if set(prices) != {"24", "22", "21", "18"} or ounce is None:
-        for karat in ("24", "22", "21", "18"):
-            match = re.search(r"عيار\s*" + karat + r"\s*[:：\-]?\s*(\d+(?:\.\d+)?)", text)
-            if match:
-                prices[karat] = float(match.group(1))
-        ounce_match = re.search(r"(?:الأونصة|الاونصة)\s*[:：\-]?\s*(\d+(?:\.\d+)?)", text)
-        if ounce_match:
-            ounce = float(ounce_match.group(1))
+    ounce = extract_number(r"(?:الأونصة|الاونصة)\\s*(?:د\\.?ك)?\\s*([0-9]+(?:\\.[0-9]+)?)", text)
+    if ounce is None:
+        ounce = extract_number(r"(?:الأونصة|الاونصة).{0,80}?([0-9]+(?:\\.[0-9]+)?)", text)
 
     if set(prices) != {"24", "22", "21", "18"} or ounce is None:
-        preview = text[:1200]
-        raise RuntimeError(
-            "تعذر استخراج جميع الأسعار من صفحة الوزارة. لم يتم حفظ قراءة ناقصة. "
-            "مقتطف الصفحة للتشخيص: " + preview
-        )
+        raise RuntimeError("لم يتم العثور على جميع الأسعار الرسمية بعد تشغيل JavaScript. مقتطف الصفحة: " + text[:1000])
 
+    source_update_match = re.search(r"آخر تحديث\\s*[:：]?\\s*(.{5,70}?)(?:\\s+(?:النوع|عيار\\s*24)|$)", text)
+    source_update = source_update_match.group(1).strip() if source_update_match else ""
     stamp = datetime.now(TZ)
-    update_match = re.search(r"آخر تحديث\s*[:：]?\s*(.{5,60}?)(?:\s+(?:النوع|عيار\s*24)|$)", text)
-    source_update = update_match.group(1).strip() if update_match else ""
     record = {
         "date": stamp.strftime("%Y-%m-%d"),
         "time": stamp.strftime("%H:%M"),
@@ -75,10 +72,9 @@ def main():
         with open(OUT, encoding="utf-8") as f:
             data = json.load(f)
 
-    history = data.get("history", [])
-    history = [x for x in history if x.get("date") != record["date"]]
+    history = [item for item in data.get("history", []) if item.get("date") != record["date"]]
     history.append(record)
-    history.sort(key=lambda x: x["date"])
+    history.sort(key=lambda item: item["date"])
     data.update({
         "source": URL,
         "currency": "KWD",
@@ -88,7 +84,7 @@ def main():
     })
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print("Saved official reading:", record["updated_at"], prices, "ounce:", ounce)
+    print("Saved ministry reading:", record["updated_at"], prices, "ounce:", ounce, "source update:", source_update)
 
 if __name__ == "__main__":
     main()
