@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b2d">
+<title>مؤشر أسعار الذهب في الكويت</title>
+<meta name="description" content="متابعة أسعار الذهب الرسمية في الكويت وفق بيانات وزارة التجارة والصناعة.">
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#131f32;--panel2:#192840;--line:#263750;--text:#eef4fc;--muted:#9aacc3;--gold:#e8c56b;--green:#65d6a1;--red:#ff8585}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% -10%,#243956 0,transparent 42%),var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif;line-height:1.7}
+.wrap{max-width:1120px;margin:auto;padding:28px 20px 56px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:15px;background:#293950;color:var(--gold);display:grid;place-items:center;font-size:25px}.eyebrow{color:var(--gold);font-size:13px}.title{font-size:clamp(23px,4vw,34px);margin:0;font-weight:800}.sub{color:var(--muted);margin:3px 0 0;font-size:14px}.update{background:#15243a;border:1px solid var(--line);border-radius:14px;padding:9px 14px;color:var(--muted);font-size:13px}.update b{color:var(--text);display:block;font-size:14px}
+.notice{margin:24px 0 18px;padding:12px 15px;border:1px solid #66552b;background:#332b18;color:#f1d991;border-radius:12px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.price{background:linear-gradient(145deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:18px;min-height:132px}.price .label{color:var(--muted);font-size:14px}.price .num{font-size:clamp(23px,3vw,30px);font-weight:800;letter-spacing:.2px;margin:8px 0 0;direction:ltr;text-align:right}.unit{font-size:12px;color:var(--muted)}
+.section{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.section h2{font-size:18px;margin:0}.muted{color:var(--muted);font-size:13px}select{background:#0e192a;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font:inherit}
+.chart-wrap{height:260px;position:relative}canvas{width:100%;height:100%;display:block}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.stat{background:#0e192a;border-radius:12px;padding:12px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{font-size:17px;display:block;margin-top:4px}
+.table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:520px}th,td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}td.num{direction:ltr;text-align:right;font-variant-numeric:tabular-nums}.empty{text-align:center;color:var(--muted);padding:25px}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:24px}a{color:var(--gold);text-decoration:none}a:hover{text-decoration:underline}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:1fr}.wrap{padding:20px 14px 40px}.section{padding:15px}}
+@media(max-width:380px){.grid{grid-template-columns:1fr 1fr}.price{padding:13px;min-height:112px}.price .num{font-size:22px}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand"><div class="logo">◈</div><div><div class="eyebrow">المؤشر الرسمي</div><h1 class="title">أسعار الذهب في الكويت</h1><p class="sub">متابعة يومية من بيانات وزارة التجارة والصناعة</p></div></div><div class="update">آخر تحديث مسجل<strong id="updated">جارٍ تحميل البيانات…</strong></div></header>
+<div class="notice">الأسعار المعروضة هي الأسعار المنشورة من وزارة التجارة والصناعة، وليست عرض بيع أو شراء من محل ذهب. قد تختلف المصنعية وأسعار المحلات.</div>
+<section class="grid" id="prices">
+<div class="price"><div class="label">عيار 24</div><div class="num" id="p24">—</div><div class="unit">دينار كويتي / غرام</div></div>
+<div class="price"><div class="label">عيار 22</div><div class="num" id="p22">—</div><div class="unit">دينار كويتي / غرام</div></div>
+<div class="price"><div class="label">عيار 21</div><div class="num" id="p21">—</div><div class="unit">دينار كويتي / غرام</div></div>
+<div class="price"><div class="label">عيار 18</div><div class="num" id="p18">—</div><div class="unit">دينار كويتي / غرام</div></div>
+</section>
+<section class="section"><div class="section-head"><h2>سعر الأونصة</h2><span class="muted">دينار كويتي</span></div><div class="num" id="ounce" style="font-size:30px;font-weight:800;direction:ltr;text-align:right">—</div></section>
+<section class="section"><div class="section-head"><h2>الرسم البياني الشهري</h2><select id="karat" aria-label="اختر العيار"><option value="24">عيار 24</option><option value="22">عيار 22</option><option value="21" selected>عيار 21</option><option value="18">عيار 18</option></select></div><div class="chart-wrap"><canvas id="chart"></canvas></div><div class="stats"><div class="stat"><span>أعلى سعر هذا الشهر</span><strong id="high">—</strong></div><div class="stat"><span>أقل سعر هذا الشهر</span><strong id="low">—</strong></div><div class="stat"><span>التغير منذ أول قراءة هذا الشهر</span><strong id="change">—</strong></div></div><p class="muted" id="chart-note">يبدأ السجل من تاريخ تشغيل الموقع؛ لا تُعرض أسعار تاريخية غير موثقة.</p></section>
+<section class="section"><div class="section-head"><h2>السجل اليومي</h2><span class="muted" id="count">0 قراءة</span></div><div class="table-scroll"><table><thead><tr><th>التاريخ</th><th>24</th><th>22</th><th>21</th><th>18</th><th>الأونصة</th></tr></thead><tbody id="history"><tr><td colspan="6" class="empty">لا توجد قراءات مسجلة بعد.</td></tr></tbody></table></div></section>
+<footer>المصدر: <a href="https://new2.moci.gov.kw/ar/gold/" target="_blank" rel="noopener">وزارة التجارة والصناعة الكويتية</a> · تُحدّث البيانات آلياً يومياً عند نجاح جلب المصدر الرسمي.</footer>
+</main>
+<script>
+let rows=[];
+const fmt=n=>Number(n).toFixed(3);
+async function load(){try{const r=await fetch('./data/prices.json?'+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('missing');const d=await r.json();rows=Array.isArray(d.history)?d.history:[];const latest=rows.at(-1);if(!latest){document.getElementById('updated').textContent='لا توجد قراءة بعد';return}
+['24','22','21','18'].forEach(k=>document.getElementById('p'+k).textContent=fmt(latest.prices[k]));document.getElementById('ounce').textContent=fmt(latest.ounce);document.getElementById('updated').textContent=(latest.updated_at||latest.date)+' · '+(latest.time||'');
+renderTable();renderChart();document.getElementById('count').textContent=rows.length+' قراءة';
+}catch(e){document.getElementById('updated').textContent='بانتظار أول تحديث رسمي';document.getElementById('chart-note').textContent='سيظهر السجل بعد نجاح أول قراءة من موقع الوزارة.'}}
+function renderTable(){const body=document.getElementById('history');if(!rows.length)return;body.innerHTML=rows.slice().reverse().map(x=>'<tr><td>'+x.date+'</td>'+['24','22','21','18'].map(k=>'<td class="num">'+fmt(x.prices[k])+'</td>').join('')+'<td class="num">'+fmt(x.ounce)+'</td></tr>').join('')}
+function renderChart(){const c=document.getElementById('chart'),ctx=c.getContext('2d'),rect=c.getBoundingClientRect(),dpr=devicePixelRatio||1;c.width=rect.width*dpr;c.height=rect.height*dpr;ctx.scale(dpr,dpr);const w=rect.width,h=rect.height;ctx.clearRect(0,0,w,h);
+const month=new Date().toISOString().slice(0,7),data=rows.filter(x=>x.date&&x.date.slice(0,7)===month),k=document.getElementById('karat').value,vals=data.map(x=>Number(x.prices[k])).filter(Number.isFinite);
+if(!data.length){ctx.fillStyle='#9aacc3';ctx.textAlign='center';ctx.font='14px Tahoma';ctx.fillText('لا توجد بيانات مسجلة لهذا الشهر حتى الآن',w/2,h/2);['high','low','change'].forEach(id=>document.getElementById(id).textContent='—');return}
+const min=Math.min(...vals),max=Math.max(...vals),pad=28,span=(max-min)||1;ctx.strokeStyle='#263750';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=pad+(h-2*pad)*i/3;ctx.beginPath();ctx.moveTo(8,y);ctx.lineTo(w-8,y);ctx.stroke()}
+ctx.strokeStyle='#e8c56b';ctx.lineWidth=2.5;ctx.beginPath();data.forEach((x,i)=>{let px=pad+(w-2*pad)*(data.length===1?.5:i/(data.length-1)),py=h-pad-(Number(x.prices[k])-min)/span*(h-2*pad);i?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.stroke();data.forEach((x,i)=>{let px=pad+(w-2*pad)*(data.length===1?.5:i/(data.length-1)),py=h-pad-(Number(x.prices[k])-min)/span*(h-2*pad);ctx.fillStyle='#e8c56b';ctx.beginPath();ctx.arc(px,py,3.5,0,Math.PI*2);ctx.fill()});
+document.getElementById('high').textContent=fmt(max)+' د.ك';document.getElementById('low').textContent=fmt(min)+' د.ك';const delta=Number(data.at(-1).prices[k])-Number(data[0].prices[k]);document.getElementById('change').textContent=(delta>0?'+':'')+fmt(delta)+' د.ك';document.getElementById('change').style.color=delta>0?'#65d6a1':delta<0?'#ff8585':'#eef4fc';
+}
+document.getElementById('karat').addEventListener('change',renderChart);addEventListener('resize',renderChart);load();
+</script></body></html>
