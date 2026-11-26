@@ -25,7 +25,7 @@ def main():
         page.goto(URL, wait_until="domcontentloaded", timeout=60000)
         try:
             page.wait_for_function(
-                "() => document.body && /عيار\\s*24/.test(document.body.innerText) && /الأونصة|الاونصة/.test(document.body.innerText)",
+                "() => document.body && /عيار\s*24/.test(document.body.innerText) && /الأونصة|الاونصة/.test(document.body.innerText)",
                 timeout=45000
             )
         except PlaywrightTimeoutError:
@@ -40,20 +40,20 @@ def main():
 
     prices = {}
     for karat in ("24", "22", "21", "18"):
-        value = extract_number(r"عيار\\s*" + karat + r"\\s*(?:د\\.?ك)?\\s*([0-9]+(?:\\.[0-9]+)?)", text)
+        value = extract_number(r"عيار\s*" + karat + r"\s*(?:د\.?ك)?\s*([0-9]+(?:\.[0-9]+)?)", text)
         if value is None:
-            value = extract_number(r"عيار\\s*" + karat + r".{0,80}?([0-9]+(?:\\.[0-9]+)?)", text)
+            value = extract_number(r"عيار\s*" + karat + r".{0,80}?([0-9]+(?:\.[0-9]+)?)", text)
         if value is not None:
             prices[karat] = value
 
-    ounce = extract_number(r"(?:الأونصة|الاونصة)\\s*(?:د\\.?ك)?\\s*([0-9]+(?:\\.[0-9]+)?)", text)
+    ounce = extract_number(r"(?:الأونصة|الاونصة)\s*(?:د\.?ك)?\s*([0-9]+(?:\.[0-9]+)?)", text)
     if ounce is None:
-        ounce = extract_number(r"(?:الأونصة|الاونصة).{0,80}?([0-9]+(?:\\.[0-9]+)?)", text)
+        ounce = extract_number(r"(?:الأونصة|الاونصة).{0,80}?([0-9]+(?:\.[0-9]+)?)", text)
 
     if set(prices) != {"24", "22", "21", "18"} or ounce is None:
         raise RuntimeError("لم يتم العثور على جميع الأسعار الرسمية بعد تشغيل JavaScript. مقتطف الصفحة: " + text[:1000])
 
-    source_update_match = re.search(r"آخر تحديث\\s*[:：]?\\s*(.{5,70}?)(?:\\s+(?:النوع|عيار\\s*24)|$)", text)
+    source_update_match = re.search(r"آخر تحديث\s*[:：]?\s*(.{5,70}?)(?:\s+(?:النوع|عيار\s*24)|$)", text)
     source_update = source_update_match.group(1).strip() if source_update_match else ""
     stamp = datetime.now(TZ)
     record = {
