@@ -16,7 +16,21 @@
       },
       "ounce": 1121.151,
       "source": "https://new2.moci.gov.kw/ar/gold/"
+    },
+    {
+      "date": "2026-11-27",
+      "time": "16:02",
+      "updated_at": "2026-11-27 16:02",
+      "source_updated_at": "نوفمبر 27 2026 8:05 ص",
+      "prices": {
+        "24": 35.277,
+        "22": 32.367,
+        "21": 30.898,
+        "18": 26.484
+      },
+      "ounce": 1097.23,
+      "source": "https://new2.moci.gov.kw/ar/gold/"
     }
   ],
-  "last_updated": "2026-11-26 16:07"
+  "last_updated": "2026-11-27 16:02"
 }
